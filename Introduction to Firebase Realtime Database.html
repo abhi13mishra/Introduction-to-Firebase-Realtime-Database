@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase Users List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 60%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #ddd;
+    }
+    #message {
+      margin-top: 20px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Users List from Firebase</h2>
+
+  <div id="message">Loading users...</div>
+
+  <table id="usersTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody id="usersBody"></tbody>
+  </table>
+
+  <script>
+    // Tumhara Firebase Realtime Database users URL
+    const databaseURL = "https://users-e6ad2-default-rtdb.firebaseio.com/users.json";
+
+    async function fetchUsers() {
+      const messageDiv = document.getElementById("message");
+      const usersTable = document.getElementById("usersTable");
+      const usersBody = document.getElementById("usersBody");
+
+      messageDiv.textContent = "Loading users...";
+      usersTable.style.display = "none";
+      usersBody.innerHTML = "";
+
+      try {
+        const response = await fetch(databaseURL);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+
+        if (!data) {
+          messageDiv.textContent = "No users found in database.";
+          return;
+        }
+
+        // data is object: { user1: {...}, user2: {...} }
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            const user = data[key];
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = user.name || "N/A";
+
+            const emailCell = document.createElement("td");
+            emailCell.textContent = user.email || "N/A";
+
+            row.appendChild(nameCell);
+            row.appendChild(emailCell);
+
+            usersBody.appendChild(row);
+          }
+        }
+
+        messageDiv.textContent = "";
+        usersTable.style.display = "table";
+
+      } catch (error) {
+        messageDiv.textContent = "Error fetching users: " + error.message;
+      }
+    }
+
+    fetchUsers();
+  </script>
+
+</body>
+</html>
